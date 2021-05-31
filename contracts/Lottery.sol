@@ -41,14 +41,19 @@ contract Lottery is Ownable {
     return numberToFind;
   }
 
+  function setTicketValue(uint256 _ticketValue) public onlyOwner {
+    ticketValue = _ticketValue;
+  }
+
+  function setModulus(uint256 _modulus) public onlyOwner {
+    modulus = _modulus;
+  }
+
   function guessNumber(uint256 _guess) payable public returns (bool) {
     require(msg.value == ticketValue, "Incorrect ticket value received");
-
-    (bool success, ) = address(this).call{value: msg.value}("");
-    require(success, "Ticket purchase failed");
-
     playerAddresses.push(msg.sender);
     hasPlayed[msg.sender] = true;
+
     if (_guess == numberToFind) {
       // Sender has won the game, and gains the balance of the smart contract.
       bool fundsSent = sendFunds();
