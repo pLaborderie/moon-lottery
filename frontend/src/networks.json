@@ -2,11 +2,21 @@
   "1287": {
     "name": "Moonbeam Testnet",
     "address": "0xc032902EF9CE6B9cbC8bc70D523620C09B0aE081",
-    "chainId": 1287
+    "chainId": "1287"
   },
   "80001": {
     "name": "Polygon Testnet",
     "address": "0xE90BAC80fa9c34215C99A9A0B3Dc9fffF68214C7",
-    "chainId": 80001
+    "chainId": "80001"
+  },
+  "43114": {
+    "name": "Avalanche Network",
+    "address": "",
+    "chainId": "43114"
+  },
+  "43113": {
+    "name": "Avalanche Fuji Testnet",
+    "address": "0x4e6563E3ED3A745B7E5731C526974F53c88C6A1E",
+    "chainId": "43113"
   }
 }
