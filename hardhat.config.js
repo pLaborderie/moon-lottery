@@ -14,6 +14,10 @@ module.exports = {
       url: `https://rpc.testnet.moonbeam.network`,
       chainId: 1287,
       accounts: [privateKey]
+    },
+    matic: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [privateKey]
     }
   }
 };

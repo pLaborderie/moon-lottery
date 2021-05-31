@@ -12,6 +12,8 @@ contract Lottery is Ownable {
   mapping (address => bool) hasPlayed;
   address[] playerAddresses;
 
+  event TicketBought(address indexed from, bool isWinningTicket);
+
   constructor(uint256 _modulus, uint256 _ticketValue) {
     modulus = _modulus;
     ticketValue = _ticketValue;
@@ -53,7 +55,7 @@ contract Lottery is Ownable {
     modulus = _modulus;
   }
 
-  function guessNumber(uint256 _guess) payable public returns (bool) {
+  function guessNumber(uint256 _guess) payable public {
     require(msg.value == ticketValue, "Incorrect ticket value received");
     playerAddresses.push(msg.sender);
     hasPlayed[msg.sender] = true;
@@ -63,10 +65,10 @@ contract Lottery is Ownable {
       bool fundsSent = sendFunds();
       require(fundsSent, "Funds could not be sent to player");
       resetLottery();
-      return true;
+      emit TicketBought(msg.sender, true);
     } else {
       // Sender guessed wrong and cannot try again until someone wins.
-      return false;
+      emit TicketBought(msg.sender, false);
     }
   }
 }

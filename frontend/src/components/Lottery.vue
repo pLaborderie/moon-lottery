@@ -20,6 +20,7 @@
 <script>
 import Web3 from 'web3';
 import LotteryAbi from '../assets/lottery_abi.json';
+import networks from '../networks.json';
 
 export default {
   data() {
@@ -50,38 +51,44 @@ export default {
         console.log('MetaMask is installed!');
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         this.account = accounts[0];
+        await this.connectToContract();
       }
     },
     listenForAccount: function() {
       if (window.ethereum) {
-        let intervalCount = 0;
-        const interval = setInterval(() => {
-          if (window.ethereum.address || intervalCount >= 5) {
-            this.account = window.ethereum.selectedAddress;
-            clearInterval(interval);
-          } else {
-            intervalCount++;
-          }
-        }, 500)
-        window.ethereum.on('accountsChanged', function(newAccounts) {
+        window.ethereum.on('accountsChanged', (newAccounts) => {
           this.account = newAccounts[0];
           this.checkRights();
+          this.listenForResultEvent();
         });
       }
     },
-    connectToContract: function() {
-      this.contract = new this.web3.eth.Contract(LotteryAbi, process.env.VUE_APP_CONTRACT_ADDRESS);
-      this.checkRights()
+    listenForResultEvent: function() {
+      if (this.contract && this.account) {
+        this.contract.events.TicketBought({ filter: { from: this.account } })
+          .on('data', (event) => {
+            if (event.returnValues.isWinningTicket) {
+              alert('You won!');
+            } else {
+              alert('You lost... Better luck next time!');
+            }
+          })
+          .on('error', (error, receipt) => {
+            console.error(error);
+            console.log(receipt);
+          });
+      }
+    },
+    connectToContract: async function() {
+      const address = await this.getContractAddress();
+      this.contract = new this.web3.eth.Contract(LotteryAbi, address);
+      this.checkRights();
+      this.listenForResultEvent();
     },
     async submit() {
       if (this.guess) {
         const ticketValue = await this.contract.methods.getTicketValue().call({ from: this.account });
-        const result = await this.contract.methods.guessNumber(parseInt(this.guess)).send({ from: this.account, value: ticketValue, gas: 1000000 });
-        if (result.status) {
-          alert('You won! You will receive your funds shortly at the address: ' + this.account);
-        } else {
-          alert('You lost. Better luck next time!');
-        }
+        await this.contract.methods.guessNumber(parseInt(this.guess)).send({ from: this.account, value: ticketValue, gas: 1000000 });
       }
     },
     async getNumber() {
@@ -92,6 +99,10 @@ export default {
       if (this.contract) {
         this.owner = await this.contract.methods.owner().call({ from: this.account });
       }
+    },
+    async getContractAddress() {
+      const chainId = await this.web3.eth.getChainId();
+      return networks[chainId].address;
     },
     setTicketValue() {
       return this.contract.methods.setTicketValue(this.ticketValue).send({ from: this.account });
