@@ -45,6 +45,10 @@ contract Lottery is Ownable {
     ticketValue = _ticketValue;
   }
 
+  function getTicketValue() public view returns (uint256) {
+    return ticketValue;
+  }
+
   function setModulus(uint256 _modulus) public onlyOwner {
     modulus = _modulus;
   }

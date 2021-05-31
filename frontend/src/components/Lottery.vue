@@ -75,7 +75,8 @@ export default {
     },
     async submit() {
       if (this.guess) {
-        const result = await this.contract.methods.guessNumber(parseInt(this.guess)).send({ from: this.account, value: 1000000000000000, gas: 1000000 });
+        const ticketValue = await this.contract.methods.getTicketValue().call({ from: this.account });
+        const result = await this.contract.methods.guessNumber(parseInt(this.guess)).send({ from: this.account, value: ticketValue, gas: 1000000 });
         if (result.status) {
           alert('You won! You will receive your funds shortly at the address: ' + this.account);
         } else {
@@ -93,7 +94,7 @@ export default {
       }
     },
     setTicketValue() {
-      return this.contract.methods.setTicketValue(parseInt(this.ticketValue)).send({ from: this.account });
+      return this.contract.methods.setTicketValue(this.ticketValue).send({ from: this.account });
     }
   },
 }
